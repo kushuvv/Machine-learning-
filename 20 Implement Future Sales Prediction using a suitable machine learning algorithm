@@ -1,0 +1,46 @@
+import pandas as pd
+import numpy as np
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LinearRegression
+import plotly.express as px
+import plotly.io as pio
+
+# Fix Plotly for Google Colab
+pio.renderers.default = "colab"
+
+# Load dataset
+data = pd.read_csv("futuresale prediction.csv")
+
+# Display dataset info
+print(data.head())
+print("\nMissing Values:\n", data.isnull().sum())
+
+# Separate features and target
+X = data[['TV', 'Radio', 'Newspaper']]
+y = data['Sales']
+
+# Train-test split
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=42
+)
+
+# Train Linear Regression model
+model = LinearRegression()
+model.fit(X_train, y_train)
+
+# Calculate accuracy (R² score)
+accuracy = model.score(X_test, y_test) * 100
+print("\nModel Accuracy: {:.1f}%".format(accuracy))
+
+# Data visualization
+fig1 = px.scatter(data, x="TV", y="Sales", size="TV",
+                  title="TV Advertisement vs Sales")
+fig1.show()
+
+fig2 = px.scatter(data, x="Radio", y="Sales", size="Radio",
+                  title="Radio Advertisement vs Sales")
+fig2.show()
+
+fig3 = px.scatter(data, x="Newspaper", y="Sales", size="Newspaper",
+                  title="Newspaper Advertisement vs Sales")
+fig3.show()
