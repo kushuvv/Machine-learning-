@@ -1,0 +1,44 @@
+# Step 1: Import Libraries
+import pandas as pd
+from sklearn.preprocessing import LabelEncoder
+from sklearn.tree import DecisionTreeClassifier, plot_tree
+import matplotlib.pyplot as plt
+# Step 2: Load Dataset
+data = pd.read_csv("/content/play_tennis.csv")
+# Drop the 'day' column (just ID)
+data = data.drop('day', axis=1)
+# Step 3: Encode categorical features
+le_dict = {}
+for col in data.columns:
+    le = LabelEncoder()
+    data[col] = le.fit_transform(data[col])
+    le_dict[col] = le
+# Separate features and target
+X = data.iloc[:, :-1]
+y = data.iloc[:, -1]
+# Step 4: Train Decision Tree using ID3 (entropy)
+clf = DecisionTreeClassifier(criterion='entropy')
+clf.fit(X, y)
+# Step 5: Display the tree (graphically)
+plt.figure(figsize=(20,10))
+plot_tree(clf,
+          feature_names=X.columns,
+          class_names=le_dict['play'].classes_,
+          filled=True,
+          rounded=True,
+          fontsize=12)
+plt.title("Decision Tree (ID3) - Play Tennis Dataset")
+plt.show()
+# Step 6: Classify a new sample
+new_sample = pd.DataFrame([["Sunny", "Cool", "High", "Weak"]],
+                          columns=['outlook','temp','humidity','wind'])
+# Encode new sample
+for col in new_sample.columns:
+    le = le_dict[col]
+    new_sample[col] = le.transform(new_sample[col])
+# Predict
+prediction = clf.predict(new_sample)
+predicted_class = le_dict['play'].inverse_transform(prediction)
+print("\nNew Sample Prediction:")
+print(new_sample)
+print("Predicted Class:", predicted_class[0])
