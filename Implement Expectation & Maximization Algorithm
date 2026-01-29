@@ -1,0 +1,27 @@
+import numpy as np
+from sklearn.mixture import GaussianMixture
+import matplotlib.pyplot as plt
+# Step 1: Generate synthetic dataset
+np.random.seed(42)
+# Two Gaussian clusters
+X1 = np.random.normal(loc=0.0, scale=1.0, size=200)
+X2 = np.random.normal(loc=5.0, scale=1.5, size=200)
+X = np.concatenate([X1, X2]).reshape(-1, 1)
+# Step 2: Apply EM via Gaussian Mixture Model
+gmm = GaussianMixture(n_components=2, random_state=42)
+gmm.fit(X)
+# Predict cluster assignments
+labels = gmm.predict(X)
+# Step 3: Print learned parameters
+print("Means:", gmm.means_.flatten())
+print("Variances:", gmm.covariances_.flatten())
+print("Weights:", gmm.weights_.flatten())
+# Step 4: Visualization
+plt.figure(figsize=(8,5))
+plt.hist(X[labels==0], bins=30, alpha=0.6, color='blue', label="Cluster 1")
+plt.hist(X[labels==1], bins=30, alpha=0.6, color='green', label="Cluster 2")
+plt.title("Expectation-Maximization (Gaussian Mixture Model)")
+plt.xlabel("Data values")
+plt.ylabel("Frequency")
+plt.legend()
+plt.show()
