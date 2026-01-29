@@ -1,0 +1,19 @@
+training_data = [
+    (["Sunny", "Warm", "Normal", "Strong", "Warm", "Same"], "Yes"),
+    (["Sunny", "Warm", "High", "Strong", "Warm", "Same"], "Yes"),
+    (["Rainy", "Cold", "High", "Strong", "Warm", "Change"], "No"),
+    (["Sunny", "Warm", "High", "Strong", "Cool", "Change"], "Yes")
+]
+num_attributes = len(training_data[0][0])
+hypothesis = ["Ø"] * num_attributes
+print("Initial Hypothesis:", hypothesis)
+for instance, label in training_data:
+    if label == "Yes":
+        for i in range(num_attributes):
+            if hypothesis[i] == "Ø":
+                hypothesis[i] = instance[i]
+            elif hypothesis[i] != instance[i]:
+                hypothesis[i] = "?"
+        print("Updated Hypothesis:", hypothesis)
+print("\nFinal Hypothesis:")
+print(hypothesis)
