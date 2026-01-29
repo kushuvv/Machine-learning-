@@ -1,0 +1,74 @@
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+from sklearn.preprocessing import OneHotEncoder
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import mean_absolute_percentage_error
+from sklearn import svm
+from sklearn.linear_model import LinearRegression
+
+# Load dataset
+dataset = pd.read_csv("HousePricePrediction.csv")
+
+print(dataset.head())
+print("Shape:", dataset.shape)
+
+# Identify column types
+object_cols = dataset.select_dtypes(include='object').columns.tolist()
+num_cols = dataset.select_dtypes(include='int').columns.tolist()
+float_cols = dataset.select_dtypes(include='float').columns.tolist()
+
+print("Categorical variables:", len(object_cols))
+print("Integer variables:", len(num_cols))
+print("Float variables:", len(float_cols))
+
+# Correlation heatmap
+numeric_data = dataset.select_dtypes(include=['number'])
+plt.figure(figsize=(12, 6))
+sns.heatmap(numeric_data.corr(), cmap='BrBG', annot=True)
+plt.title("Correlation Heatmap")
+plt.show()
+
+# Drop ID column
+dataset.drop(['Id'], axis=1, inplace=True)
+
+# Handle missing values
+dataset['SalePrice'] = dataset['SalePrice'].fillna(dataset['SalePrice'].mean())
+new_dataset = dataset.dropna()
+
+# Categorical columns
+object_cols = new_dataset.select_dtypes(include='object').columns.tolist()
+print("Categorical variables:", object_cols)
+
+# One-Hot Encoding (FIXED)
+OH_encoder = OneHotEncoder(sparse_output=False, handle_unknown='ignore')
+OH_cols = pd.DataFrame(
+    OH_encoder.fit_transform(new_dataset[object_cols]),
+    columns=OH_encoder.get_feature_names_out(object_cols),
+    index=new_dataset.index
+)
+
+# Final dataset
+df_final = new_dataset.drop(object_cols, axis=1)
+df_final = pd.concat([df_final, OH_cols], axis=1)
+
+# Features and target
+X = df_final.drop('SalePrice', axis=1)
+Y = df_final['SalePrice']
+
+# Train-test split
+X_train, X_valid, Y_train, Y_valid = train_test_split(
+    X, Y, test_size=0.2, random_state=0
+)
+
+# Support Vector Regression
+model_SVR = svm.SVR()
+model_SVR.fit(X_train, Y_train)
+Y_pred_svr = model_SVR.predict(X_valid)
+print("SVR MAPE:", mean_absolute_percentage_error(Y_valid, Y_pred_svr))
+
+# Linear Regression
+model_LR = LinearRegression()
+model_LR.fit(X_train, Y_train)
+Y_pred_lr = model_LR.predict(X_valid)
+print("Linear Regression MAPE:", mean_absolute_percentage_error(Y_valid, Y_pred_lr))
